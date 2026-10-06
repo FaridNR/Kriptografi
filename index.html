@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>ROT13, Atbash & Caesar Cipher - HTML</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #141e30, #243b55);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 850px;
+            background: white;
+            border-radius: 18px;
+            padding: 30px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .identity {
+            display: inline-block;
+            background: #eef4ff;
+            border: 2px solid #d4e2ff;
+            color: #243b55;
+            font-weight: bold;
+            font-size: 14px;
+            padding: 8px 18px;
+            border-radius: 20px;
+            margin-bottom: 15px;
+        }
+
+        .header h1 {
+            color: #243b55;
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #777;
+            font-size: 15px;
+        }
+
+        .card {
+            background: #f7f9fc;
+            border-radius: 14px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        select,
+        input[type="number"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            outline: none;
+            background: white;
+            color: #333;
+            transition: 0.3s;
+        }
+
+        select {
+            cursor: pointer;
+        }
+
+        select:focus,
+        input[type="number"]:focus {
+            border-color: #243b55;
+        }
+
+        textarea {
+            width: 100%;
+            height: 180px;
+            resize: vertical;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            padding: 15px;
+            font-size: 16px;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        textarea:focus {
+            border-color: #243b55;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        button {
+            flex: 1;
+            border: none;
+            padding: 14px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .encrypt {
+            background: #243b55;
+            color: white;
+        }
+
+        .encrypt:hover {
+            background: #162638;
+        }
+
+        .decrypt {
+            background: #4caf50;
+            color: white;
+        }
+
+        .decrypt:hover {
+            background: #388e3c;
+        }
+
+        .reset {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .reset:hover {
+            background: #ccc;
+        }
+
+        .result {
+            background: #eef4ff;
+            border: 2px solid #d4e2ff;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .result h3 {
+            color: #243b55;
+            margin-bottom: 12px;
+        }
+
+        .result-text {
+            background: white;
+            min-height: 100px;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-size: 16px;
+            color: #222;
+        }
+
+        /* Tabel Q Caesar */
+        .qtable-box {
+            background: #eef4ff;
+            border: 2px solid #d4e2ff;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .qtable-box h3 {
+            color: #243b55;
+            margin-bottom: 6px;
+        }
+
+        .qtable-box p {
+            color: #555;
+            font-size: 13px;
+            margin-bottom: 12px;
+        }
+
+        .qtable-scroll {
+            overflow-x: auto;
+        }
+
+        table.qtable {
+            border-collapse: collapse;
+            width: 100%;
+            min-width: 760px;
+            background: white;
+            font-family: monospace;
+            font-size: 13px;
+        }
+
+        table.qtable th,
+        table.qtable td {
+            border: 1px solid #d4e2ff;
+            padding: 6px 4px;
+            text-align: center;
+            color: #222;
+        }
+
+        table.qtable th.rowhead {
+            background: #243b55;
+            color: white;
+            text-align: left;
+            padding: 6px 10px;
+            white-space: nowrap;
+        }
+
+        table.qtable tr.cipher td {
+            background: #e8f5e9;
+            font-weight: bold;
+            color: #2e7d32;
+        }
+
+        .info {
+            margin-top: 25px;
+            padding: 18px;
+            background: #fff8e1;
+            border-left: 5px solid #ffc107;
+            border-radius: 8px;
+        }
+
+        .info h3 {
+            margin-bottom: 12px;
+            color: #795548;
+        }
+
+        .info h4 {
+            margin-top: 12px;
+            margin-bottom: 6px;
+            color: #5d4037;
+        }
+
+        .info p {
+            color: #555;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        .example {
+            margin-top: 8px;
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 13px;
+            color: #333;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 25px;
+            color: #888;
+            font-size: 13px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 25px;
+            }
+
+            .buttons {
+                flex-direction: column;
+            }
+
+            textarea {
+                height: 150px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="header">
+        <div class="identity">Farid Noor Rahman &nbsp;|&nbsp; NIM 2411001</div>
+        <h1>ROT13, Atbash & Caesar Cipher</h1>
+        <p>Web Enkripsi dan Dekripsi Menggunakan Metode ROT13, Atbash & Caesar</p>
+    </div>
+
+    <div class="card">
+
+        <form id="cipher-form" onsubmit="return false;">
+
+            <div class="form-group">
+                <label for="metode">Pilih Metode Enkripsi</label>
+                <select name="metode" id="metode" onchange="toggleCaesar()">
+                    <option value="rot13" selected>ROT13 Cipher</option>
+                    <option value="atbash">Atbash Cipher</option>
+                    <option value="caesar">Caesar Cipher</option>
+                </select>
+            </div>
+
+            <div class="form-group" id="kunci-group" style="display:none;">
+                <label for="kunci">Kunci Geser (1 - 25)</label>
+                <input
+                    type="number"
+                    name="kunci"
+                    id="kunci"
+                    min="1"
+                    max="25"
+                    value="3"
+                    oninput="renderTable()"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="text">Masukkan Teks</label>
+                <textarea
+                    name="text"
+                    id="text"
+                    placeholder="Masukkan teks yang ingin dienkripsi atau didekripsi..."
+                ></textarea>
+            </div>
+
+            <div class="buttons">
+
+                <button
+                    type="button"
+                    class="encrypt"
+                    onclick="proses('encrypt')"
+                >
+                    🔐 Enkripsi
+                </button>
+
+                <button
+                    type="button"
+                    class="decrypt"
+                    onclick="proses('decrypt')"
+                >
+                    🔓 Dekripsi
+                </button>
+
+                <button
+                    type="button"
+                    class="reset"
+                    onclick="resetForm()"
+                >
+                    🔄 Reset
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+    <!-- Tabel Q Caesar (tampil saat metode Caesar dipilih) -->
+    <div class="qtable-box" id="qtable-box" style="display:none;">
+        <h3>📊 Tabel Q Caesar Cipher (Kunci = <span id="qk">3</span>)</h3>
+        <p>Rumus enkripsi: C = (P + K) mod 26 &nbsp;|&nbsp; Rumus dekripsi: P = (C − K) mod 26</p>
+        <div class="qtable-scroll">
+            <table class="qtable" id="qtable"></table>
+        </div>
+    </div>
+
+    <!-- Hasil (tampil setelah tombol Enkripsi/Dekripsi ditekan) -->
+    <div class="result" id="result-box" style="display:none;">
+        <h3 id="result-title"></h3>
+        <div class="result-text" id="result-text"></div>
+    </div>
+
+
+    <div class="info">
+
+        <h3>📚 Tentang Metode Klasik</h3>
+
+        <h4>1. ROT13 Cipher</h4>
+        <p>
+            Metode substitusi yang menggeser setiap huruf alfabet sebanyak 13 posisi. Karena alfabet memiliki 26 huruf, mengaplikasikan ROT13 dua kali akan mengembalikan teks ke bentuk aslinya.
+        </p>
+        <div class="example">
+            Contoh (ROT13):<br>
+            Universitas Mulia → Havirefvgnf Zhyvn
+        </div>
+
+        <h4>2. Atbash Cipher</h4>
+        <p>
+            Metode kriptografi klasik yang membalik urutan alfabet. Huruf pertama (A) dipetakan ke huruf terakhir (Z), huruf kedua (B) dipetakan ke (Y), dan seterusnya.
+        </p>
+        <div class="example">
+            Pemetaan: A ↔ Z, B ↔ Y, C ↔ X, ..., M ↔ N<br><br>
+            Contoh (Atbash):<br>
+            Universitas Mulia → Ferevihrgzh Nforz
+        </div>
+
+        <h4>3. Caesar Cipher</h4>
+        <p>
+            Metode substitusi yang menggeser setiap huruf sebanyak K posisi (kunci) ke kanan untuk enkripsi dan K posisi ke kiri untuk dekripsi. ROT13 sebenarnya adalah Caesar dengan kunci 13.
+        </p>
+        <div class="example">
+            Contoh (Caesar, K = 3):<br>
+            Universitas Mulia → Xqlyhuvlwdv Pxold
+        </div>
+
+    </div>
+
+    <footer>
+        ROT13, Atbash & Caesar Cipher &copy; <span id="tahun"></span>
+    </footer>
+
+</div>
+
+<script>
+    // ==========================================
+    // ROT13, ATBASH & CAESAR - ENKRIPSI & DEKRIPSI
+    // ==========================================
+
+    // Fungsi Caesar Cipher (shift positif = enkripsi, negatif = dekripsi)
+    function caesarCipher(text, shift) {
+        shift = (((parseInt(shift, 10) % 26) + 26) % 26);
+        var out = "";
+        for (var i = 0; i < text.length; i++) {
+            var c = text.charAt(i);
+            var code = text.charCodeAt(i);
+            if (c >= 'A' && c <= 'Z') {
+                out += String.fromCharCode((code - 65 + shift) % 26 + 65);
+            } else if (c >= 'a' && c <= 'z') {
+                out += String.fromCharCode((code - 97 + shift) % 26 + 97);
+            } else {
+                out += c;
+            }
+        }
+        return out;
+    }
+
+    // Fungsi ROT13 Cipher (Caesar dengan kunci 13)
+    function rot13Cipher(text) {
+        return caesarCipher(text, 13);
+    }
+
+    // Fungsi Atbash Cipher
+    function atbashCipher(text) {
+        var from = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+        var to   = 'ZYXWVUTSRQPONMLKJIHGFEDCBAzyxwvutsrqponmlkjihgfedcba';
+        var out = "";
+        for (var i = 0; i < text.length; i++) {
+            var c = text.charAt(i);
+            var pos = from.indexOf(c);
+            out += (pos !== -1) ? to.charAt(pos) : c;
+        }
+        return out;
+    }
+
+    // Proses enkripsi / dekripsi
+    function proses(aksi) {
+        var input  = document.getElementById('text').value;
+        var metode = document.getElementById('metode').value;
+        var kunci  = parseInt(document.getElementById('kunci').value, 10);
+        if (isNaN(kunci) || kunci < 1 || kunci > 25) { kunci = 3; }
+        document.getElementById('kunci').value = kunci;
+
+        var hasil = "";
+        var namaMetode = "";
+
+        if (metode === "atbash") {
+            hasil = atbashCipher(input);
+            namaMetode = "Atbash";
+        } else if (metode === "caesar") {
+            hasil = caesarCipher(input, aksi === "decrypt" ? -kunci : kunci);
+            namaMetode = "Caesar, Kunci " + kunci;
+        } else {
+            hasil = rot13Cipher(input);
+            namaMetode = "ROT13";
+        }
+
+        var box = document.getElementById('result-box');
+        if (hasil !== "") {
+            var judul = (aksi === "encrypt") ? "Hasil Enkripsi" : "Hasil Dekripsi";
+            document.getElementById('result-title').textContent = judul + " (" + namaMetode + ")";
+            document.getElementById('result-text').textContent = hasil;
+            box.style.display = 'block';
+        } else {
+            box.style.display = 'none';
+        }
+    }
+
+    // Reset form
+    function resetForm() {
+        document.getElementById('metode').value = 'rot13';
+        document.getElementById('kunci').value = 3;
+        document.getElementById('text').value = '';
+        document.getElementById('result-box').style.display = 'none';
+        toggleCaesar();
+    }
+
+    // Tabel Q Caesar
+    function renderTable() {
+        var k = parseInt(document.getElementById('kunci').value, 10);
+        if (isNaN(k) || k < 1 || k > 25) { k = 3; }
+        document.getElementById('qk').textContent = k;
+
+        var plain = '<th class="rowhead">Plain (P)</th>';
+        var idx   = '<th class="rowhead">Indeks</th>';
+        var ciph  = '<th class="rowhead">Cipher (Q)</th>';
+
+        for (var i = 0; i < 26; i++) {
+            plain += '<td>' + String.fromCharCode(65 + i) + '</td>';
+            idx   += '<td>' + i + '</td>';
+            ciph  += '<td>' + String.fromCharCode(65 + (i + k) % 26) + '</td>';
+        }
+
+        document.getElementById('qtable').innerHTML =
+            '<tr>' + plain + '</tr>' +
+            '<tr>' + idx + '</tr>' +
+            '<tr class="cipher">' + ciph + '</tr>';
+    }
+
+    function toggleCaesar() {
+        var isCaesar = document.getElementById('metode').value === 'caesar';
+        document.getElementById('kunci-group').style.display = isCaesar ? 'block' : 'none';
+        document.getElementById('qtable-box').style.display  = isCaesar ? 'block' : 'none';
+        if (isCaesar) { renderTable(); }
+    }
+
+    document.getElementById('tahun').textContent = new Date().getFullYear();
+    toggleCaesar();
+</script>
+
+</body>
+</html>
